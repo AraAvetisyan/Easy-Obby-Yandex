@@ -77,6 +77,8 @@ public class Geekplay : MonoBehaviour
     public event Action LeaderboardValuesReady;
     public event Action ShowedAdInEditor;
     public bool GameIsReady;
+
+    public bool GameStoped;
     public void RunCoroutine(IEnumerator enumerator)
     {
         StartCoroutine(enumerator);
@@ -134,16 +136,12 @@ public class Geekplay : MonoBehaviour
         string value = parts[0];
         string leaderboardName = parts[1];
 
-        lS.Add(value);
+        lS[leaderNumber] = value;
 
-        if (leaderNumber < 9)
+        if (leaderNumber < 5)
         {
             leaderNumber += 1;
             Utils.GetLeaderboard("score", leaderNumber, leaderboardName);
-        }
-        else if (leaderNumber == 9)
-        {
-            EndGetLeaderboardsValue();
         }
     }
 
@@ -153,9 +151,9 @@ public class Geekplay : MonoBehaviour
         string value = parts[0];
         string leaderboardName = parts[1];
 
-        lN.Add(value);
+        lN[leaderNumberN] = value;
 
-        if (leaderNumberN < 9)
+        if (leaderNumberN < 5)
         {
             leaderNumberN += 1;
             Utils.GetLeaderboard("name", leaderNumberN, leaderboardName);
@@ -235,7 +233,7 @@ public class Geekplay : MonoBehaviour
             PlayerData = new PlayerData();
         }
 
-        // remainingTimeUntilUpdateLeaderboard -= Time.deltaTime;
+        remainingTimeUntilUpdateLeaderboard -= Time.deltaTime;
     }
 
     IEnumerator CanReward()
@@ -614,7 +612,7 @@ public class Geekplay : MonoBehaviour
         }
         else
         {
-            Destroy(gameObject);
+            //Destroy(gameObject);
         }
 
         if (Platform == Platform.GameDistribution || Platform == Platform.CrazyGames || Platform == Platform.Editor)
@@ -873,6 +871,11 @@ public class Geekplay : MonoBehaviour
         {
             Time.timeScale = 0;
             AudioListener.volume = 0;
+        }
+
+        if (GameStoped)
+        {
+            Time.timeScale = 0;
         }
         //////////
     }

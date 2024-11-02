@@ -256,7 +256,7 @@ public class VehicleControl : MonoBehaviour
     public Vector2 inputVector { get; private set; }
 
     [Header("ControllerButtons")]
-    [SerializeField] private Button[] controllerButtons;
+    public Button[] controllerButtons;
     public class WheelComponent
     {
 
@@ -690,33 +690,35 @@ public class VehicleControl : MonoBehaviour
 
 
 
-
-        if (activeControl)
+        if (_teleport.CanMove)
         {
-
-            if (controlMode == ControlMode.simple)
+            if (activeControl)
             {
-                accel = 0;
-               
-                shift = false;
 
-                if (carWheels.wheels.frontWheelDrive || carWheels.wheels.backWheelDrive)
+                if (controlMode == ControlMode.simple)
                 {
-                    steer = Mathf.MoveTowards(steer, Input.GetAxis("Horizontal"), 0.2f);
-                    accel = Input.GetAxis("Vertical");
-                    brake = Input.GetButton("Jump");
-                    shift = Input.GetKey(KeyCode.LeftShift) | Input.GetKey(KeyCode.RightShift);
+                    accel = 0;
+
+                    shift = false;
+
+                    if (carWheels.wheels.frontWheelDrive || carWheels.wheels.backWheelDrive)
+                    {
+                        steer = Mathf.MoveTowards(steer, Input.GetAxis("Horizontal"), 0.2f);
+                        accel = Input.GetAxis("Vertical");
+                        brake = Input.GetButton("Jump");
+                        shift = Input.GetKey(KeyCode.LeftShift) | Input.GetKey(KeyCode.RightShift);
+                    }
+
+                }
+                else if (controlMode == ControlMode.touch)
+                {
+
+                    if (accelFwd != 0) { accel = accelFwd; } else { accel = accelBack; }
+                    steer = Mathf.MoveTowards(steer, steerAmount, 0.07f);
+
                 }
 
             }
-            else if (controlMode == ControlMode.touch)
-            {
-
-                if (accelFwd != 0) { accel = accelFwd; } else { accel = accelBack; }
-                steer = Mathf.MoveTowards(steer, steerAmount, 0.07f);
-
-            }
-
         }
         else
         {

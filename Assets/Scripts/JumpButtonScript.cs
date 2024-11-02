@@ -16,7 +16,36 @@ public class JumpButtonScript : MonoBehaviour, IPointerDownHandler
     [SerializeField] private bool gamemodeRunning;
     [SerializeField] private AudioSource jumpAudio;
     [SerializeField] private AudioSource jumpAudio2;
+    private void Update()
+    {
+        if (_playerController._teleport.CanMove)
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                Jump();
+            }
+            if (_playerController.IsCoyot)
+            {
+                if (!_playerController.IsGrounded)
+                {
+                    jumpForce = 1200;
+                }
+                else
+                {
+                    jumpForce = 750;
+                }
+            }
+            else
+            {
+                jumpForce = 750;
+            }
+        }
+    }
     public void OnPointerDown(PointerEventData eventData)
+    {
+        Jump();
+    }
+    public void Jump()
     {
         if (_playerController.IsGrounded)
         {
@@ -35,7 +64,7 @@ public class JumpButtonScript : MonoBehaviour, IPointerDownHandler
     }
     public IEnumerator OnJump()
     {
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.8f);
         _playerController.IsJumping = false;
     }
 }

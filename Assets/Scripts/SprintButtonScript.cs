@@ -14,16 +14,42 @@ public class SprintButtonScript : MonoBehaviour, IPointerDownHandler, IPointerUp
     {
         SprintSpeed = 1;
     }
+    private void Update()
+    {
+        if (_playerController._teleport.CanMove)
+        {
+            if (_playerController.IsJumping)
+            {
+                StopSprint();
+            }
+            if (Input.GetKey(KeyCode.LeftShift) && !_playerController.IsJumping)
+            {
+                StartSprint();
+            }
+            if (Input.GetKeyUp(KeyCode.LeftShift))
+            {
+                StopSprint();
+            }
+        }
+    }
     public void OnPointerDown(PointerEventData eventData)
+    {
+        StartSprint();
+    }
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        StopSprint();
+    }
+    public void StartSprint()
     {
         if (_playerController.IsGrounded)
         {
             SprintSpeed = SprintSpeedMultiplier;
             _playerController.IsSprint = true;
-         //   sprintAudio.Play();
+            //   sprintAudio.Play();
         }
     }
-    public void OnPointerUp(PointerEventData eventData)
+    public void StopSprint()
     {
         SprintSpeed = 1f;
         _playerController.IsSprint = false;

@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] private FloatingJoystick _floatingJoystick;
+    public FloatingJoystick _floatingJoystick;
     [SerializeField] private Rigidbody rb;
     private float currentVelocity;
     private float speedVelocity;
@@ -54,7 +54,14 @@ public class PlayerController : MonoBehaviour
     public Vector2 inputVector { get; private set; }
 
     public bool IsCoyot;
+    public bool isAngular;
 
+    [Header("PC")]
+    public GameObject jumpButton;
+    public GameObject sptintButton;
+    [SerializeField] private Transform buttonsPos;
+    
+    public Teleport _teleport;
     private void Start()
     {
         if (Geekplay.Instance.mobile)
@@ -65,6 +72,8 @@ public class PlayerController : MonoBehaviour
         {
             isMobile = false;
             _floatingJoystick.gameObject.SetActive(false);
+            jumpButton.transform.position = buttonsPos.position;
+            sptintButton.transform.position = buttonsPos.position;
         }
         cinemachinePOV = connectedCamera.GetCinemachineComponent<CinemachinePOV>();
         framingTransposer = connectedCamera.GetCinemachineComponent<CinemachineFramingTransposer>();
@@ -166,15 +175,18 @@ public class PlayerController : MonoBehaviour
 
         Vector2 input = Vector2.zero;
 
-        if (isMobile)
+        if (_teleport.CanMove)
         {
-            input = new Vector2(_floatingJoystick.Horizontal, _floatingJoystick.Vertical);
-            
-        }
-        else
-        {
-            input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-            
+            if (isMobile)
+            {
+                input = new Vector2(_floatingJoystick.Horizontal, _floatingJoystick.Vertical);
+
+            }
+            else
+            {
+                input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+
+            }
         }
         Vector2 inputDir = input.normalized;
 
@@ -187,32 +199,22 @@ public class PlayerController : MonoBehaviour
         CurrentSpeed = Mathf.SmoothDamp(CurrentSpeed, targertSpeed, ref speedVelocity, smootSpeedTimer);
 
         transform.Translate(transform.forward * CurrentSpeed * Time.deltaTime, Space.World);
-        //if (IsGrounded && rb.velocity != Vector3.zero && !IsJumping)
-        //{
-        //    rb.velocity = Vector3.zero;
-        //}
-        if (IsGrounded && rb.velocity != Vector3.zero && !IsJumping)
+        if (IsGrounded && rb.velocity != Vector3.zero && !IsJumping && !isAngular)
         {
+            isAngular = true;
             rb.velocity = Vector3.zero;
+            
         }
-        //if (graundObjects.Count > 0)
-        //{
-        //    IsGrounded = true;
-        //    IsFalling = false;
-        //}
-        //else
-        //{
-        //    IsGrounded = false;
-        //}
         if (graundObjects.Count > 0)
         {
             IsGrounded = true;
             IsFalling = false;
+            IsCoyot = false;
+            isAngular = false;
         }
         else if(graundObjects.Count <= 0 && !IsCoyot && !IsJumping)
         {
-            //IsGrounded = false;
-            IsCoyot = true;
+            //IsCoyot = true;
             StartCoroutine(CoyotTime());
         }
         else if(graundObjects.Count <= 0 && IsJumping)
@@ -252,7 +254,14 @@ public class PlayerController : MonoBehaviour
                 CanPlaySound = false;
                 Animator.SetBool("IsRunning", false);
             }
-
+            if(IsSprint && IsJumping)
+            {
+                CanOnTrail = false;
+                for (int i = 0; i < trails.Length; i++)
+                {
+                    trails[i].SetActive(false);                 
+                }
+            }
             if (IsSprint && CurrentSpeed > 0 && !IsFalling)
             {
 
@@ -308,8 +317,11 @@ public class PlayerController : MonoBehaviour
     }
     public IEnumerator CoyotTime()
     {
-        yield return new WaitForSeconds(0.25f);
+        
+        IsCoyot = true;
+        yield return new WaitForSeconds(1.5f);
         IsCoyot = false;
+        isAngular = false;
         IsGrounded = false;
     }
     public IEnumerator CanTrail()
